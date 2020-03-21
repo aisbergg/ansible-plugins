@@ -40,12 +40,19 @@ class FilterModule(object):
             raise errors.AnsibleFilterError("'{}' is not an iterable".format(seq))
 
         default = kwargs.pop('default', Undefined())
+        attr = [int(x) if x.isdigit() else x for x in attr.split(".")]
 
         def func(item):
             if not isinstance(item, dict):
                 raise errors.AnsibleFilterError("'{}' is not a mapping".format(item))
-            value = getattr(item, attr, default)
-            return environment.call_test(func_name, value, args, kwargs)
+
+            for part in attr:
+                item = environment.getitem(item, part)
+                if isinstance(item, Undefined):
+                    item = default
+                    break
+
+            return environment.call_test(func_name, item, args, kwargs)
 
         if seq:
             for item in seq:
