@@ -1,0 +1,4 @@
+[MESSAGES CONTROL]
+max-line-length=120
+# all codes: http://pylint-messages.wikidot.com/all-codes
+disable=invalid-name, trailing-whitespace, missing-docstring
