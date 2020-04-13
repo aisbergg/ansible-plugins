@@ -9,6 +9,7 @@ This repository contains filter and test plugins to be used with Ansible.
   - [Reference](#reference)
     - [`selectattr2`](#selectattr2)
     - [`pbkdf2_hash`](#pbkdf2hash)
+    - [`to_gvariant`](#togvariant)
 - [Test Plugins](#test-plugins)
   - [Install](#install-1)
   - [Reference](#reference-1)
@@ -59,6 +60,16 @@ Create a password hash using pbkdf2.
 Example:
 ```django
 {{ plain_password | pbkdf2_hash(rounds=50000, scheme='sha512') }}
+```
+
+#### `to_gvariant`
+
+Convert a value to GVariant Text Format.
+
+Example:
+```django
+{{ [1, 3.14, True, "foo", {"bar": 0}] | to_gvariant() }}
+-> [1, 3.14, true, 'foo', {'bar': 0}]
 ```
 
 ## Test Plugins
