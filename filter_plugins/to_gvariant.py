@@ -1,25 +1,63 @@
-import json
-from json.encoder import JSONEncoder, _make_iterencode
-
-
-class GVariantDumper(JSONEncoder):
+class GVariantEncoder(object):
 
     def encode(self, o):
+        chunks = self._iterencode(o)
+        if not isinstance(chunks, (list, tuple)):
+            chunks = list(chunks)
+        return ''.join(chunks)
+
+    def _iterencode(self, o):
         if isinstance(o, str):
-            return self.encode_basestring(o)
-        return super().encode(o)
-
-    def encode_basestring(self, value):
-        """Encode strings with single quotes."""
-        return f"'{value}'"
-
-    def iterencode(self, o, _one_shot=False):
-        _markers = None
-        _encoder = self.encode_basestring
-        _floatstr = float.__repr__
-        _iterencode = _make_iterencode(_markers, self.default, _encoder, self.indent, _floatstr, self.key_separator,
-                                       self.item_separator, self.sort_keys, self.skipkeys, _one_shot)
-        return _iterencode(o, 0)
+            yield "'" + o + "'"
+        elif o is None:
+            yield "null"
+        elif o is True:
+            yield "true"
+        elif o is False:
+            yield "false"
+        elif isinstance(o, int):
+            yield int.__str__(o)
+        elif isinstance(o, float):
+            yield float.__str__(o)
+        elif isinstance(o, list):
+            if not o:
+                yield "[]"
+                return
+            yield "["
+            first = True
+            for item in o:
+                if not first:
+                    yield ", "
+                yield from self._iterencode(item)
+                first = False
+            yield "]"
+        elif isinstance(o, tuple):
+            if not o:
+                yield "()"
+                return
+            yield "("
+            first = True
+            for item in o:
+                if not first:
+                    yield ", "
+                yield from self._iterencode(item)
+                first = False
+            yield ")"
+        elif isinstance(o, dict):
+            if not o:
+                yield "{}"
+                return
+            yield "{"
+            first = True
+            for k, v in o.items():
+                if not first:
+                    yield ", "
+                yield "'" + k + "': "
+                yield from self._iterencode(v)
+                first = False
+            yield "}"
+        else:
+            raise TypeError(f"Object of type {o.__class__.__name__} is not GVariant serializable")
 
 
 class FilterModule(object):
@@ -32,13 +70,12 @@ class FilterModule(object):
     def to_gvariant(self, value):
         """Convert a value to GVariant Text Format.
 
-        The GVariant Text Format is quite similar to the JSON format, which
-        inspired me to use the Python JSON encoder to create the GVariant Text
-        Format. The encoder supports the basic types, but lacks the support of
-        advanced GVariant types.
+        All standard Python types are supported. Advanced GVariant types might
+        be missing, but those might not really be required to use the 'dconf'
+        module for example.
 
         Args: value (object): The object to be converted.
 
         Returns: str: GVariant text formatted string.
         """
-        return json.dumps(value, cls=GVariantDumper)
+        return GVariantEncoder().encode(value)

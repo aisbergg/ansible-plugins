@@ -68,8 +68,8 @@ Convert a value to GVariant Text Format.
 
 Example:
 ```django
-{{ [1, 3.14, True, "foo", {"bar": 0}] | to_gvariant() }}
--> [1, 3.14, true, 'foo', {'bar': 0}]
+{{ [1, 3.14, True, "foo", {"bar": 0}, ("foo", "bar")] | to_gvariant() }}
+-> [1, 3.14, true, 'foo', {'bar': 0}, ('foo', 'bar')]
 ```
 
 ## Test Plugins
