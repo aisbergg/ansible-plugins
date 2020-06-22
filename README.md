@@ -8,12 +8,12 @@ This repository contains filter and test plugins to be used with Ansible.
   - [Install](#install)
   - [Reference](#reference)
     - [`selectattr2`](#selectattr2)
-    - [`pbkdf2_hash`](#pbkdf2hash)
-    - [`to_gvariant`](#togvariant)
+    - [`pbkdf2_hash`](#pbkdf2_hash)
+    - [`to_gvariant`](#to_gvariant)
 - [Test Plugins](#test-plugins)
   - [Install](#install-1)
   - [Reference](#reference-1)
-    - [`bool`](#bool)
+    - [`boolean`](#boolean)
     - [`list`](#list)
 - [License](#license)
 - [Author Information](#author-information)
@@ -90,13 +90,15 @@ To install one or more _tests_ in an Ansible Playbook or Ansible Role, add a dir
 
 ### Reference
 
-#### `bool`
+#### `boolean`
 
 Test if a value is of type boolean.
 
+This test plugin can be used until Ansible adapts Jinja2 version 2.11, which comes with this filter built-in ([see](https://jinja.palletsprojects.com/en/2.11.x/templates/#boolean)). 
+
 Example:
 ```django
-{% if foo is bool %}{{ foo | ternary('yes', 'no') }}{% endif %}
+{% if foo is boolean %}{{ foo | ternary('yes', 'no') }}{% endif %}
 ```
 
 #### `list`
