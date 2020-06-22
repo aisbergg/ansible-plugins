@@ -10,7 +10,7 @@ class TestModule(object):
 
         Jinja2 >= 2.11 comes a built-in boolean test, but most systems will ship
         an older version. Until Ansible adopts the new Jinja2 version, this test
-        can be used as a alternative.
+        can be used as an alternative.
 
         Args:
             value: A value, that shall be type tested
