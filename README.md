@@ -1,6 +1,6 @@
 # Ansible Plugins
 
-This repository contains filter and test plugins to be used with Ansible.
+This repository contains custom Ansible plugins, that can be used in Ansible Roles and Playbooks.
 
 **Table of contents:**
 
@@ -10,9 +10,13 @@ This repository contains filter and test plugins to be used with Ansible.
     - [`selectattr2`](#selectattr2)
     - [`pbkdf2_hash`](#pbkdf2_hash)
     - [`to_gvariant`](#to_gvariant)
-- [Test Plugins](#test-plugins)
+- [Lookup Plugins](#lookup-plugins)
   - [Install](#install-1)
   - [Reference](#reference-1)
+    - [`keepassxc_lookup`](#keepassxc_lookup)
+- [Test Plugins](#test-plugins)
+  - [Install](#install-2)
+  - [Reference](#reference-2)
     - [`boolean`](#boolean)
     - [`list`](#list)
 - [License](#license)
@@ -34,7 +38,7 @@ Filters are used to transform data inside template expressions. In general filte
 
 ### Install
 
-To install one or more _filters_ in an Ansible Playbook or Ansible Role, add a directory named `filter_plugins` and place the filter (Python script) inside it.
+To install one or more _filters_ in an Ansible Playbook or Ansible Role, add a directory named `filter_plugins` and place the _filters_ (Python scripts) inside it.
 
 ### Reference
 
@@ -72,6 +76,39 @@ Example:
 -> [1, 3.14, true, 'foo', {'bar': 0}, ('foo', 'bar')]
 ```
 
+## Lookup Plugins
+
+Lookup plugins allow Ansible to access data from outside sources. Lookups are used as follows:
+
+```yaml
+- set_fact:
+    # retrieve or generate a random password
+    var: "{{ lookup('password', '/tmp/passwordfile') }}"
+```
+
+### Install
+
+To install one or more _lookups_ in an Ansible Playbook or Ansible Role, add a directory named `lookup_plugins` and place the _lookups_ (Python scripts) inside it.
+
+### Reference
+
+#### `keepassxc_lookup`
+
+Retrieves a password from an opened KeepassXC database using the KeepassXC Browser protocol.
+
+Example:
+```yml
+- set_fact:
+    # simple password lookup by URL
+    var1: "{{ lookup('keepassxc_password', 'https://example.org') }}"
+    # password lookup by URL and login name
+    var2: "{{ lookup('keepassxc_password', 'url=ansible://mysql login=root') }}"
+    # password lookup by URL and name
+    var3: "{{ lookup('keepassxc_password', 'url=ansible://secret name=\"My Secret\"') }}"
+    # password lookup by URL and group
+    var4: "{{ lookup('keepassxc_password', 'url=ansible://secret group=department_x') }}"
+```
+
 ## Test Plugins
 
 Tests are used to evaluate template expressions and return either True or False. Tests are used as follows:
@@ -86,7 +123,7 @@ Tests are used to evaluate template expressions and return either True or False.
 
 ### Install
 
-To install one or more _tests_ in an Ansible Playbook or Ansible Role, add a directory named `test_plugins` and place the test (Python script) inside it.
+To install one or more _tests_ in an Ansible Playbook or Ansible Role, add a directory named `test_plugins` and place the _tests_ (Python scripts) inside it.
 
 ### Reference
 
