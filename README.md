@@ -96,6 +96,12 @@ To install one or more _lookups_ in an Ansible Playbook or Ansible Role, add a d
 
 Retrieves a password from an opened KeepassXC database using the KeepassXC Browser protocol.
 
+The plugin requires the Python [`keepassxy_browser`](https://github.com/hrehfeld/python-keepassxc-browser) module. In particular the following version needs to be installed, wich contains a fix for an important bug:
+
+```sh
+pip install --user git+https://github.com/piegamesde/python-keepassxc-browser.git@cdf44db9f9fe696dd5863008b7c594f9e0bdaf28
+```
+
 Example:
 ```yml
 - set_fact:
