@@ -13,7 +13,7 @@ This repository contains custom Ansible plugins, that can be used in Ansible Rol
 - [Lookup Plugins](#lookup-plugins)
   - [Install](#install-1)
   - [Reference](#reference-1)
-    - [`keepassxc_lookup`](#keepassxc_lookup)
+    - [`keepassxc_password`](#keepassxc_password)
 - [Test Plugins](#test-plugins)
   - [Install](#install-2)
   - [Reference](#reference-2)
@@ -94,7 +94,7 @@ To install one or more _lookups_ in an Ansible Playbook or Ansible Role, add a d
 
 ### Reference
 
-#### `keepassxc_lookup`
+#### `keepassxc_password`
 
 Retrieves a password from an opened KeepassXC database using the KeepassXC Browser protocol.
 
