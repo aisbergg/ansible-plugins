@@ -73,7 +73,12 @@ from ansible.errors import AnsibleError, AnsibleParserError
 from ansible.plugins.lookup import LookupBase
 from ansible.utils.display import Display
 from ansible.parsing.splitter import parse_kv
-from keepassxc_browser import Connection, Identity, ProtocolError
+
+try:
+    from keepassxc_browser import Connection, Identity, ProtocolError
+    KEEPASSXC_BROWSER_MODULE_AVAILABLE = True
+except ImportError:
+    KEEPASSXC_BROWSER_MODULE_AVAILABLE = False
 
 __version__ = "1.0.0"
 __license__ = "MIT"
@@ -174,6 +179,9 @@ class LookupModule(LookupBase):
         return url, specifiers
 
     def run(self, terms, variables=None, **kwargs):
+        if not KEEPASSXC_BROWSER_MODULE_AVAILABLE:
+            raise AnsibleError("The keepassxc_browser module is required to use the keepassxc_password lookup plugin")
+
         try:
             lookup = KeepassXCPasswordLookup()
         except ProtocolError as excp:
