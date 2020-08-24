@@ -24,9 +24,9 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 DOCUMENTATION = '''
-lookup: keepassxc_password
+lookup: keepassxc_browser_password
 author: Andre Lehmann <aisberg@posteo.de>
-short_description: retrieve a password from an opend KeepassXC database
+short_description: retrieve a password from an opened KeepassXC database
 description:
     - Retrieves a password from an opened KeepassXC database using the KeepassXC Browser protocol.
 options:
@@ -58,7 +58,7 @@ EXAMPLES = '''
 - name: create a mysql user with a password retrieved from KeepassXC db
   mysql_user:
     name: myuser
-    password: "{{ lookup('keepassxc_password', 'url=ansible://mysql-root login=myuser') }}"
+    password: "{{ lookup('keepassxc_browser_password', 'url=ansible://mysql-root login=myuser') }}"
 '''
 
 RETURN = '''
@@ -109,7 +109,7 @@ class KeepassXCBrowserPasswordLookup():
         self.connection.change_public_keys(self.id)
 
         if not self.connection.test_associate(self.id):
-            display.debug('keepassxc_password: Associating with KeepassXC')
+            display.debug('keepassxc_browser_password: Associating with KeepassXC')
             assert self.connection.associate(self.id)
             data = self.id.serialize()
             state_file.write_text(data)
@@ -152,8 +152,8 @@ class LookupModule(LookupBase):
         elif isinstance(term, dict):
             params = term
         else:
-            raise AnsibleParserError("Unsupported parameter type '{}' passed to keepassxc_password lookup.".format(
-                type(term)))
+            raise AnsibleParserError(
+                "Unsupported parameter type '{}' passed to keepassxc_browser_password lookup.".format(type(term)))
 
         url = params.get('url', None)
 
@@ -163,13 +163,13 @@ class LookupModule(LookupBase):
             del params['_raw_params']
 
         if not url:
-            raise AnsibleParserError("Missing 'url' parameter for keepassxc_password lookup")
+            raise AnsibleParserError("Missing 'url' parameter for keepassxc_browser_password lookup")
 
         # check for invalid parameters
         valid_params = frozenset(('url', 'name', 'login', 'group'))
         invalid_params = frozenset(params.keys()).difference(valid_params)
         if invalid_params:
-            raise AnsibleParserError("Unrecognized parameter(s) given to keepassxc_password lookup: {}".format(
+            raise AnsibleParserError("Unrecognized parameter(s) given to keepassxc_browser_password lookup: {}".format(
                 ', '.join(invalid_params)))
 
         if 'url' in params:
@@ -180,7 +180,8 @@ class LookupModule(LookupBase):
 
     def run(self, terms, variables=None, **kwargs):
         if not KEEPASSXC_BROWSER_MODULE_AVAILABLE:
-            raise AnsibleError("The keepassxc_browser module is required to use the keepassxc_password lookup plugin")
+            raise AnsibleError(
+                "The keepassxc_browser module is required to use the keepassxc_browser_password lookup plugin")
 
         try:
             lookup = KeepassXCBrowserPasswordLookup()
@@ -193,11 +194,11 @@ class LookupModule(LookupBase):
         try:
             for term in terms:
                 url, filters = self._parse_parameters(term)
-                display.vvvv("keepassxc_password: {}".format(str({'url': url, **filters})))
+                display.vvvv("keepassxc_browser_password: {}".format(str({'url': url, **filters})))
                 ret.append(lookup.get_password(url=url, filters=filters))
         except Exception as ex:
-            del lookup
             raise AnsibleError(str(ex))
+        finally:
+            del lookup
 
-        del lookup
         return ret

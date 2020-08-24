@@ -13,7 +13,7 @@ This repository contains custom Ansible plugins, that can be used in Ansible Rol
 - [Lookup Plugins](#lookup-plugins)
   - [Install](#install-1)
   - [Reference](#reference-1)
-    - [`keepassxc_password`](#keepassxc_password)
+    - [`keepassxc_browser_password`](#keepassxc_browser_password)
 - [Test Plugins](#test-plugins)
   - [Install](#install-2)
   - [Reference](#reference-2)
@@ -94,7 +94,7 @@ To install one or more _lookups_ in an Ansible Playbook or Ansible Role, add a d
 
 ### Reference
 
-#### `keepassxc_password`
+#### `keepassxc_browser_password`
 
 Retrieves a password from an opened KeepassXC database using the KeepassXC Browser protocol.
 
@@ -102,7 +102,7 @@ The plugin allows to automatically load sensitive information from KeepassXC int
 
 **Installation:**
 
-The plugin requires the Python [`keepassxy_browser`](https://github.com/hrehfeld/python-keepassxc-browser) module. In particular the following version needs to be installed, wich contains a fix for an important bug:
+The plugin requires the Python [`keepassxc_browser`](https://github.com/hrehfeld/python-keepassxc-browser) module. In particular the following version needs to be installed, wich contains a fix for an important bug:
 
 ```sh
 pip install --user git+https://github.com/piegamesde/python-keepassxc-browser.git@cdf44db9f9fe696dd5863008b7c594f9e0bdaf28
@@ -113,21 +113,21 @@ pip install --user git+https://github.com/piegamesde/python-keepassxc-browser.gi
 ```yml
 - set_fact:
     # simple password lookup by URL
-    var1: "{{ lookup('keepassxc_password', 'https://example.org') }}"
+    var1: "{{ lookup('keepassxc_browser_password', 'https://example.org') }}"
     # password lookup by URL and login name
     # the protocol part 'ansible://' is required to form a valid URL, it doesn't have to be 'https://' or else
-    var2: "{{ lookup('keepassxc_password', 'url=ansible://mysql login=root') }}"
+    var2: "{{ lookup('keepassxc_browser_password', 'url=ansible://mysql login=root') }}"
     # password lookup by URL and name
-    var3: "{{ lookup('keepassxc_password', 'url=ansible://secret name=\"My Secret\"') }}"
+    var3: "{{ lookup('keepassxc_browser_password', 'url=ansible://secret name=\"My Secret\"') }}"
     # password lookup by URL and group
-    var4: "{{ lookup('keepassxc_password', 'url=ansible://secret group=department_x') }}"
+    var4: "{{ lookup('keepassxc_browser_password', 'url=ansible://secret group=department_x') }}"
 ```
 
 To automatically load the _become_  or _SSH_ password on Ansible startup, simply add a lookup to your `group_vars/all`:
 
 ```yml
-ansible_become_pass: "{{ lookup('keepassxc_password', 'ansible://linux-user login=andre') }}"
-ansible_ssh_pass: "{{ lookup('keepassxc_password', 'ansible://linux-user login=andre') }}"
+ansible_become_pass: "{{ lookup('keepassxc_browser_password', 'ansible://linux-user login=andre') }}"
+ansible_ssh_pass: "{{ lookup('keepassxc_browser_password', 'ansible://linux-user login=andre') }}"
 ```
 
 It is also possible to automate the vault decryption, it requires an additional script to accomplish though. I created a [Vault Password Client Script](https://docs.ansible.com/ansible/latest/user_guide/vault.html#vault-password-client-scripts) for that purpose, that reuses some of the code of the lookup plugin:
@@ -144,7 +144,7 @@ RELATIVE_PATH_TO_PLUGIN_DIR = "../../plugins/lookup/"
 
 sys.path.append(str(Path(__file__).parent.joinpath(RELATIVE_PATH_TO_PLUGIN_DIR).resolve()))
 from keepassxc_browser import Connection, Identity, ProtocolError
-from keepassxc_password import KeepassXCBrowserPasswordLookup
+from keepassxc_browser_password import KeepassXCBrowserPasswordLookup
 
 __author__  = "Andre Lehmann"
 __email__   = "aisberg@posteo.de"
@@ -180,7 +180,7 @@ if __name__ == "__main__":
     main()
 ```
 
-The script needs to be saved as `*-client.py` in order to work. One thing that need to be changed, is the path (`RELATIVE_PATH_TO_PLUGIN_DIR`) to the plugin dir containing the keepassxc_password lookup plugin. That's done, you can use it as follows:
+The script needs to be saved as `*-client.py` in order to work. One thing that need to be changed, is the path (`RELATIVE_PATH_TO_PLUGIN_DIR`) to the plugin dir containing the keepassxc_browser_password lookup plugin. That's done, you can use it as follows:
 
 1. Save the vault password in KeepassXC:
    - Username: `myuser`
