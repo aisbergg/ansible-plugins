@@ -14,6 +14,7 @@ This repository contains custom Ansible plugins, that can be used in Ansible Rol
   - [Install](#install-1)
   - [Reference](#reference-1)
     - [`keepassxc_browser_password`](#keepassxc_browser_password)
+    - [`keepass_http_password`](#keepass_http_password)
 - [Test Plugins](#test-plugins)
   - [Install](#install-2)
   - [Reference](#reference-2)
@@ -187,6 +188,36 @@ The script needs to be saved as `*-client.py` in order to work. One thing that n
    - Password: `myvaultpass`
    - URL: `ansible://ansible-vault`
 2. Run Ansible: `ansible-playbook --vault-id myuser@/path/to/vault-pass-client.py ...`
+
+#### `keepass_http_password`
+
+Retrieves a password from an opened Keepass database using the Keepass HTTP protocol.
+
+This plugin works much like the [`keepassxc_browser_password`](#keepassxc_browser_password) plugin and offers similar features.
+
+**Installation:**
+
+The plugin requires the Python [`keepasshttp`](https://github.com/cyrbil/python_keepass_http) module. You can install it via `pip install --user keepasshttp`. After that the plugin just needs to be copied into dir `lookup_plugins` in your Ansible repository.
+
+**Example:**
+
+```yml
+- set_fact:
+    # simple password lookup by URL
+    var1: "{{ lookup('keepass_http_password', 'https://example.org') }}"
+    # password lookup by URL and login name
+    # the protocol part 'ansible://' is required to form a valid URL, it doesn't have to be 'https://' or else
+    var2: "{{ lookup('keepass_http_password', 'url=ansible://mysql login=root') }}"
+    # password lookup by URL and name
+    var3: "{{ lookup('keepass_http_password', 'url=ansible://secret name=\"My Secret\"') }}"
+```
+
+To automatically load the _become_  or _SSH_ password on Ansible startup, simply add a lookup to your `group_vars/all`:
+
+```yml
+ansible_become_pass: "{{ lookup('keepass_http_password', 'ansible://linux-user login=andre') }}"
+ansible_ssh_pass: "{{ lookup('keepass_http_password', 'ansible://linux-user login=andre') }}"
+```
 
 ## Test Plugins
 
