@@ -144,7 +144,7 @@ RELATIVE_PATH_TO_PLUGIN_DIR = "../../plugins/lookup/"
 
 sys.path.append(str(Path(__file__).parent.joinpath(RELATIVE_PATH_TO_PLUGIN_DIR).resolve()))
 from keepassxc_browser import Connection, Identity, ProtocolError
-from keepassxc_password import KeepassXCPasswordLookup
+from keepassxc_password import KeepassXCBrowserPasswordLookup
 
 __author__  = "Andre Lehmann"
 __email__   = "aisberg@posteo.de"
@@ -159,7 +159,7 @@ def main():
     args = parser.parse_args(sys.argv[1:])
 
     try:
-        lookup = KeepassXCPasswordLookup()
+        lookup = KeepassXCBrowserPasswordLookup()
     except ProtocolError as excp:
         raise AnsibleError("Failed to establish a connection to KeepassXC: {}".format(excp))
     except Exception as excp:
@@ -167,8 +167,8 @@ def main():
 
     try:
         url = "ansible://ansible-vault"
-        specifiers = dict(login=args.vault_id)
-        vault_pass = lookup.get_password(url=url, specifiers=specifiers)
+        filters = dict(login=args.vault_id)
+        vault_pass = lookup.get_password(url=url, filters=filters)
     except Exception as ex:
         del lookup
         raise AnsibleError(str(ex))

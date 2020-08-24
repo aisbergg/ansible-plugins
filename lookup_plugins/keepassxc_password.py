@@ -80,14 +80,14 @@ try:
 except ImportError:
     KEEPASSXC_BROWSER_MODULE_AVAILABLE = False
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 __license__ = "MIT"
 __email__ = "aisberg@posteo.de"
 
 display = Display()
 
 
-class KeepassXCPasswordLookup():
+class KeepassXCBrowserPasswordLookup():
 
     client_id = 'ansible-lookup'
 
@@ -122,23 +122,23 @@ class KeepassXCPasswordLookup():
     def __del__(self):
         self._close_connection()
 
-    def get_password(self, url, specifiers=None):
-        specifiers = specifiers or {}
+    def get_password(self, url, filters=None):
+        filters = filters or {}
         try:
             logins = self.connection.get_logins(self.id, url=url)
         except ProtocolError:
             raise LookupError("No password found for url '{}'".format(url))
 
-        # use specifiers to trim down result list
-        if specifiers:
+        # use filters to trim down result list
+        if filters:
             for login in logins:
-                for k, v in specifiers.items():
+                for k, v in filters.items():
                     if v != login[k]:
                         break
                 else:
                     return login['password']
 
-            raise LookupError("No password found for {}".format(str({'url': url, **specifiers})))
+            raise LookupError("No password found for {}".format(str({'url': url, **filters})))
 
         # get password for given url
         return logins[0]['password']
@@ -174,16 +174,16 @@ class LookupModule(LookupBase):
 
         if 'url' in params:
             del params['url']
-        specifiers = params
+        filters = params
 
-        return url, specifiers
+        return url, filters
 
     def run(self, terms, variables=None, **kwargs):
         if not KEEPASSXC_BROWSER_MODULE_AVAILABLE:
             raise AnsibleError("The keepassxc_browser module is required to use the keepassxc_password lookup plugin")
 
         try:
-            lookup = KeepassXCPasswordLookup()
+            lookup = KeepassXCBrowserPasswordLookup()
         except ProtocolError as excp:
             raise AnsibleError("Failed to establish a connection to KeepassXC: {}".format(excp))
         except Exception as excp:
@@ -192,9 +192,9 @@ class LookupModule(LookupBase):
         ret = []
         try:
             for term in terms:
-                url, specifiers = self._parse_parameters(term)
-                display.vvvv("keepassxc_password: {}".format(str({'url': url, **specifiers})))
-                ret.append(lookup.get_password(url=url, specifiers=specifiers))
+                url, filters = self._parse_parameters(term)
+                display.vvvv("keepassxc_password: {}".format(str({'url': url, **filters})))
+                ret.append(lookup.get_password(url=url, filters=filters))
         except Exception as ex:
             del lookup
             raise AnsibleError(str(ex))
