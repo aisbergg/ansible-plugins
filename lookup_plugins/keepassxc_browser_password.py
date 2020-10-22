@@ -80,7 +80,7 @@ try:
 except ImportError:
     KEEPASSXC_BROWSER_MODULE_AVAILABLE = False
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 __license__ = "MIT"
 __email__ = "aisberg@posteo.de"
 
@@ -89,22 +89,26 @@ display = Display()
 
 class KeepassXCBrowserPasswordLookup():
 
-    client_id = 'ansible-lookup'
+    CLIENT_ID = 'ansible-lookup'
+    STATE_FILE_DEFAULT = '.keepassxc-assoc'
+    SOCKET_NAME_DEFAULT = 'org.keepassxc.KeePassXC.BrowserServer'
 
-    def __init__(self):
+    def __init__(self, state_file=None, socket_name=None):
         self.connection = None
+        self.state_file = state_file or KeepassXCBrowserPasswordLookup.STATE_FILE_DEFAULT
+        self.socket_name = socket_name or KeepassXCBrowserPasswordLookup.SOCKET_NAME_DEFAULT
         self.id = None
         self._open_connection()
 
     def _open_connection(self):
-        state_file = Path('.keepassxc-assoc')
+        state_file = Path(self.state_file)
         if state_file.exists():
             data = state_file.read_text()
-            self.id = Identity.unserialize(self.client_id, data)
+            self.id = Identity.unserialize(self.CLIENT_ID, data)
         else:
-            self.id = Identity(self.client_id)
+            self.id = Identity(self.CLIENT_ID)
 
-        self.connection = Connection(socket_name='org.keepassxc.KeePassXC.BrowserServer')
+        self.connection = Connection(socket_name=self.socket_name)
         self.connection.connect()
         self.connection.change_public_keys(self.id)
 
@@ -183,8 +187,15 @@ class LookupModule(LookupBase):
             raise AnsibleError(
                 "The keepassxc_browser module is required to use the keepassxc_browser_password lookup plugin")
 
+        # get configuration parameters for the plugin
+        variables = variables or {}
+        state_file = variables.get("keepassxc_browser_password_state_file",
+                                   KeepassXCBrowserPasswordLookup.STATE_FILE_DEFAULT)
+        socket_name = variables.get("keepassxc_browser_password_socket_name",
+                                    KeepassXCBrowserPasswordLookup.SOCKET_NAME_DEFAULT)
+
         try:
-            lookup = KeepassXCBrowserPasswordLookup()
+            lookup = KeepassXCBrowserPasswordLookup(state_file, socket_name)
         except ProtocolError as excp:
             raise AnsibleError("Failed to establish a connection to KeepassXC: {}".format(excp))
         except Exception as excp:
