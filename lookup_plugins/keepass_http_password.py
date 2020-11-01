@@ -26,9 +26,9 @@ __metaclass__ = type
 DOCUMENTATION = '''
 lookup: keepass_http_password
 author: Andre Lehmann <aisberg@posteo.de>
-short_description: retrieve a password from an opened Keepass database
+short_description: retrieve a password from an opened KeePass database
 description:
-    - Retrieves a password from an opened Keepass database using the Keepass HTTP protocol.
+    - Retrieves a password from an opened KeePass database using the KeePass HTTP protocol.
 options:
     _terms:
         description:
@@ -43,19 +43,23 @@ options:
         description:
             - a login name that is associated with the password entry
 notes:
-    - When first querying a password, an association needs to be formed with an opened Keepass database. This means,
-      a window of Keepass will pop up and ask for an association name. Once the association is formed and stored in a
+    - When first querying a password, an association needs to be formed with an opened KeePass database. This means,
+      a window of KeePass will pop up and ask for an association name. Once the association is formed and stored in a
       file called C(.keepass-assoc), the lookup will try to retrieved the given password.
-    - Due to the nature of the Keepass protocol, a password is queried using an url. This might lead to multiple
+    - Due to the nature of the KeePass protocol, a password is queried using an url. This might lead to multiple
       passwords being found. Therefore to uniquely identify a password the parameters C(name), and C(login) can be used
       to trim down the results.
+    - The plugin configuration can be controlled by defining variables in Ansible. Following variables affect the
+      plugins behavior:
+        - C(keepass_http_password_url): KeePass HTTPPass plugin connection URL (default: http://localhost:19455/)
+        - C(keepass_http_password_state_file): Name of the state file (default: C(.keepass-assoc))
 '''
 
 EXAMPLES = '''
-- name: create a mysql user with a password retrieved from Keepass db
+- name: create a mysql user with a password retrieved from KeePass db
   mysql_user:
     name: myuser
-    password: "{{ lookup('keepass_http_password', 'url=ansible://mysql-root login=myuser') }}"
+    password: "{{ lookup('keepass_http_password', 'url=https://mysql-root login=myuser') }}"
 '''
 
 RETURN = '''
@@ -77,32 +81,49 @@ try:
 except ImportError:
     KEEPASS_HTTP_MODULE_AVAILABLE = False
 
-__version__ = "1.0.0"
-__license__ = "MIT"
-__email__ = "aisberg@posteo.de"
+__version__ = '1.2.0'
+__license__ = 'MIT'
+__email__ = 'aisberg@posteo.de'
 
 display = Display()
 
 
-class KeepassHTTPPasswordLookup():
+class KeePassHTTPPasswordLookup(object):
 
-    def __init__(self):
-        self.connection = None
+    STATE_FILE_DEFAULT = '.keepass-assoc'
+    URL_DEFAULT = 'http://localhost:19455/'
+
+    def __init__(self, state_file=None, url=None):
+        self._state_file = state_file or self.STATE_FILE_DEFAULT
+        self._url = url or self.URL_DEFAULT
+
+        self._connection = None
+        # cache for password lookups
+        self._cache = {}
+
         self._open_connection()
 
     def _open_connection(self):
-        self.connection = KeePassHTTP(storage='.keepass-assoc')
-        try:
-            self.connection._load()
-        except ConnectionError:
-            raise ConnectionError("Failed to establish a connection to Keepass. Check if Keepass is running actually.")
-        except KeePassHTTPException as err:
-            raise KeePassHTTPException("Failed to establish a connection to Keepass database: {}".format(str(err)))
+        if not self._connection:
+            self._connection = KeePassHTTP(storage=self._state_file, url=self._url)
+            try:
+                self._connection._load()
+            except ConnectionError:
+                raise ConnectionError(
+                    "Failed to establish a connection to KeePass. Check if KeePass is running actually.")
+            except KeePassHTTPException as ex:
+                raise KeePassHTTPException("Failed to establish a connection to KeePass database: {}".format(str(ex)))
 
-    def get_password(self, url, filters=None):
+    def lookup(self, url, filters=None):
         filters = filters or {}
 
-        logins = self.connection.search(url, sort_keys=True)
+        # lookup from cache
+        cache_key = str({'url': url, **filters})
+        if cache_key in self._cache:
+            return self._cache[cache_key]
+
+        # lookup from KeePass
+        logins = self._connection.search(url, sort_keys=True)
         if not logins:
             raise LookupError("No password found for url '{}'".format(url))
 
@@ -115,7 +136,7 @@ class KeepassHTTPPasswordLookup():
                 else:
                     return login.password
 
-            raise LookupError("No password found for {}".format(str({'url': url, **filters})))
+            raise LookupError("No password found for {}".format(cache_key))
 
         # get password for given url
         return logins[0].password
@@ -159,19 +180,25 @@ class LookupModule(LookupBase):
         if not KEEPASS_HTTP_MODULE_AVAILABLE:
             raise AnsibleError("The keepasshttp module is required to use the keepass_http_password lookup plugin")
 
-        ret = []
-        lookup = None
+        variables = variables or {}
+        kp_state_file = variables.get('keepass_http_password_state_file', KeePassHTTPPasswordLookup.STATE_FILE_DEFAULT)
+        kp_url = variables.get('keepass_http_password_url', KeePassHTTPPasswordLookup.URL_DEFAULT)
 
         try:
-            lookup = KeepassHTTPPasswordLookup()
-
-            for term in terms:
-                url, filters = self._parse_parameters(term)
-                display.vvvv("keepass_http_password: {}".format(str({'url': url, **filters})))
-                ret.append(lookup.get_password(url=url, filters=filters))
+            lookup = KeePassHTTPPasswordLookup(state_file=kp_state_file, url=kp_url).lookup
         except Exception as ex:
-            raise AnsibleError(str(ex))
-        finally:
-            del lookup
+            raise AnsibleError(str(ex)) from ex
+
+        ret = []
+        for term in terms:
+            url, filters = self._parse_parameters(term)
+            req = {'url': url, **filters}
+            display.vvvv("keepass_http_password: Lookup {}".format(str(req)))
+
+            # now lookup the password
+            try:
+                ret.append(lookup(url=url, filters=filters))
+            except Exception as ex:
+                raise AnsibleError(str(ex)) from ex
 
         return ret

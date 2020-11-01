@@ -26,9 +26,9 @@ __metaclass__ = type
 DOCUMENTATION = '''
 lookup: keepassxc_browser_password
 author: Andre Lehmann <aisberg@posteo.de>
-short_description: retrieve a password from an opened KeepassXC database
+short_description: retrieve a password from an opened KeePassXC database
 description:
-    - Retrieves a password from an opened KeepassXC database using the KeepassXC Browser protocol.
+    - Retrieves a password from an opened KeePassXC database using the KeePassXC Browser protocol.
 options:
     _terms:
         description:
@@ -46,16 +46,21 @@ options:
         description:
             - a login name that is associated with the password entry
 notes:
-    - When first querying a password, an association needs to be formed with an opened KeepassXC database. This means,
-      a window of KeepassXC will pop up and ask for an association name. Once the association is formed and stored in a
+    - When first querying a password, an association needs to be formed with an opened KeePassXC database. This means,
+      a window of KeePassXC will pop up and ask for an association name. Once the association is formed and stored in a
       file called C(.keepassxc-assoc), the lookup will try to retrieved the given password.
-    - Due to the nature of the KeepassXC protocol, a password is queried using an url. This might lead to multiple
+    - Due to the nature of the KeePassXC protocol, a password is queried using an url. This might lead to multiple
       passwords being found. Therefore to uniquely identify a password the parameters C(name), C(group) and C(login)
       can be used to trim down the results.
+    - The plugin configuration can be controlled by defining variables in Ansible. Following variables affect the
+      plugins behavior:
+        - C(keepassxc_browser_password_socket_name): KeePass HTTPPass plugin connection URL (default:
+          C(org.keepassxc.KeePassXC.BrowserServer))
+        - C(keepassxc_browser_password_state_file): Name of the state file (default: C(.keepassxc-assoc))
 '''
 
 EXAMPLES = '''
-- name: create a mysql user with a password retrieved from KeepassXC db
+- name: create a mysql user with a password retrieved from KeePassXC db
   mysql_user:
     name: myuser
     password: "{{ lookup('keepassxc_browser_password', 'url=ansible://mysql-root login=myuser') }}"
@@ -80,14 +85,14 @@ try:
 except ImportError:
     KEEPASSXC_BROWSER_MODULE_AVAILABLE = False
 
-__version__ = "1.2.0"
-__license__ = "MIT"
-__email__ = "aisberg@posteo.de"
+__version__ = '1.2.0'
+__license__ = 'MIT'
+__email__ = 'aisberg@posteo.de'
 
 display = Display()
 
 
-class KeepassXCBrowserPasswordLookup():
+class KeePassXCBrowserPasswordLookup(object):
 
     CLIENT_ID = 'ansible-lookup'
     STATE_FILE_DEFAULT = '.keepassxc-assoc'
@@ -95,8 +100,8 @@ class KeepassXCBrowserPasswordLookup():
 
     def __init__(self, state_file=None, socket_name=None):
         self.connection = None
-        self.state_file = state_file or KeepassXCBrowserPasswordLookup.STATE_FILE_DEFAULT
-        self.socket_name = socket_name or KeepassXCBrowserPasswordLookup.SOCKET_NAME_DEFAULT
+        self.state_file = state_file or KeePassXCBrowserPasswordLookup.STATE_FILE_DEFAULT
+        self.socket_name = socket_name or KeePassXCBrowserPasswordLookup.SOCKET_NAME_DEFAULT
         self.id = None
         self._open_connection()
 
@@ -113,7 +118,7 @@ class KeepassXCBrowserPasswordLookup():
         self.connection.change_public_keys(self.id)
 
         if not self.connection.test_associate(self.id):
-            display.debug('keepassxc_browser_password: Associating with KeepassXC')
+            display.debug('keepassxc_browser_password: Associating with KeePassXC')
             assert self.connection.associate(self.id)
             data = self.id.serialize()
             state_file.write_text(data)
@@ -190,16 +195,16 @@ class LookupModule(LookupBase):
         # get configuration parameters for the plugin
         variables = variables or {}
         state_file = variables.get("keepassxc_browser_password_state_file",
-                                   KeepassXCBrowserPasswordLookup.STATE_FILE_DEFAULT)
+                                   KeePassXCBrowserPasswordLookup.STATE_FILE_DEFAULT)
         socket_name = variables.get("keepassxc_browser_password_socket_name",
-                                    KeepassXCBrowserPasswordLookup.SOCKET_NAME_DEFAULT)
+                                    KeePassXCBrowserPasswordLookup.SOCKET_NAME_DEFAULT)
 
         try:
-            lookup = KeepassXCBrowserPasswordLookup(state_file, socket_name)
+            lookup = KeePassXCBrowserPasswordLookup(state_file, socket_name)
         except ProtocolError as excp:
-            raise AnsibleError("Failed to establish a connection to KeepassXC: {}".format(excp))
+            raise AnsibleError("Failed to establish a connection to KeePassXC: {}".format(excp))
         except Exception as excp:
-            raise AnsibleError("KeepassXC password lookup execution failed: {}".format(excp))
+            raise AnsibleError("KeePassXC password lookup execution failed: {}".format(excp))
 
         ret = []
         try:
