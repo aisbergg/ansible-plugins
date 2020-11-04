@@ -52,11 +52,11 @@ notes:
     - Due to the nature of the KeePassXC protocol, a password is queried using an url. This might lead to multiple
       passwords being found. Therefore to uniquely identify a password the parameters C(name), C(group) and C(login)
       can be used to trim down the results.
-    - The plugin configuration can be controlled by defining variables in Ansible. Following variables affect the
-      plugins behavior:
-        - C(keepassxc_browser_password_socket_name): KeePass HTTPPass plugin connection URL (default:
-          C(org.keepassxc.KeePassXC.BrowserServer))
-        - C(keepassxc_browser_password_state_file): Name of the state file (default: C(.keepassxc-assoc))
+    - "The plugin configuration can be controlled by defining variables in Ansible. Following variables affect the
+      plugins behavior:"
+    - "C(keepassxc_browser_password_socket_name): KeePass HTTPPass plugin connection URL (default:
+        C(org.keepassxc.KeePassXC.BrowserServer))"
+    - "C(keepassxc_browser_password_state_file): Name of the state file (default: C(.keepassxc-assoc))"
 '''
 
 EXAMPLES = '''

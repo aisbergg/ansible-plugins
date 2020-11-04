@@ -49,10 +49,10 @@ notes:
     - Due to the nature of the KeePass protocol, a password is queried using an url. This might lead to multiple
       passwords being found. Therefore to uniquely identify a password the parameters C(name), and C(login) can be used
       to trim down the results.
-    - The plugin configuration can be controlled by defining variables in Ansible. Following variables affect the
-      plugins behavior:
-        - C(keepass_http_password_url): KeePass HTTPPass plugin connection URL (default: http://localhost:19455/)
-        - C(keepass_http_password_state_file): Name of the state file (default: C(.keepass-assoc))
+    - "The plugin configuration can be controlled by defining variables in Ansible. Following variables affect the
+      plugins behavior:"
+    - "C(keepass_http_password_url): KeePass HTTPPass plugin connection URL (default: http://localhost:19455/)"
+    - "C(keepass_http_password_state_file): Name of the state file (default: C(.keepass-assoc))"
 '''
 
 EXAMPLES = '''
