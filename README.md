@@ -13,6 +13,7 @@ This repository contains custom Ansible plugins, that can be used in Ansible Rol
 - [Lookup Plugins](#lookup-plugins)
   - [Install](#install-1)
   - [Reference](#reference-1)
+    - [`default4dist`](#default4dist)
     - [`keepassxc_browser_password`](#keepassxc_browser_password)
       - [Automatic Login (SSH And Become Password Lookup)](#automatic-login-ssh-and-become-password-lookup)
       - [Automatic Vault Decryption](#automatic-vault-decryption)
@@ -96,6 +97,55 @@ Lookup plugins allow Ansible to access data from outside sources. Lookups are us
 To install one or more _lookups_ in an Ansible Playbook or Ansible Role, add a directory named `lookup_plugins` and place the _lookups_ (Python scripts) inside it.
 
 ### Reference
+
+#### `default4dist`
+
+Creates distribution dependent values.
+
+The default4dist lookup looks for a variable by a name prefix in combination with the OS distribution or family name and returns its value. This means, you don't have to create long chains of `ansible_distribution == 'Foo'` statements to build distribution dependent values.
+
+The lookup will search for variables in form of `{prefix}{suffix}` or `{prefix}_{suffix}`. The first found variable will be used or optional combined (dict or list) with a default value. The suffix is constructed in the following order of precedence: 
+
+- {distribution}_{version}
+- {distribution}_{release}
+- {distribution}_{major_version}
+- {distribution}
+- {familiy}_{version}
+- {familiy}_{release}
+- {familiy}_{major_version}
+- {familiy}
+- default
+
+OS distribution and family names must be specified in lower case.
+
+**Example:**
+
+```yaml
+# a simple value that differs on different Linux distributions
+myvar: "{{
+    'foo' if ansible_distribution == 'Debian' else
+    'bar' if ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8' else
+    'baz'
+}}"
+# can be replaced by:
+_myvar_default: baz
+_myvar_debian: foo
+_myvar_centos_8: bar
+myvar: "{{ lookup('default4dist', '_myvar') }}"
+
+
+# a dictionary that contains some distribution dependent values
+myvar: "{{
+    {'a': 1, 'b': foo} if ansible_distribution == 'Debian' else
+    {'a': 2, 'b': bar} if ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8' else
+    {'a': 1, 'b': baz}
+}}"
+# can be replaced by:
+_myvar_default: {'a': 1, 'b': baz}
+_myvar_debian: {'b': bar}
+_myvar_centos_8: {'a': 2, 'b': bar}
+myvar: "{{ lookup('default4dist', '_myvar', recursive=True) }}"
+```
 
 #### `keepassxc_browser_password`
 
