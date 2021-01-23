@@ -1,4 +1,31 @@
 [MESSAGES CONTROL]
-max-line-length=120
+
 # all codes: http://pylint-messages.wikidot.com/all-codes
-disable=invalid-name, trailing-whitespace, missing-docstring
+disable=invalid-name,
+        missing-docstring,
+        redefined-builtin,
+        abstract-method
+
+
+
+[FORMAT]
+
+# Expected format of line ending, e.g. empty (any line ending), LF or CRLF.
+expected-line-ending-format=LF
+
+# String used as indentation unit. This is usually "    " (4 spaces) or "\t" (1 tab).
+indent-string='    '
+
+# Maximum number of characters on a single line.
+max-line-length=120
+
+
+
+[BASIC]
+
+# Good variable names which should always be accepted, separated by a comma.
+good-names=i,
+           j,
+           k,
+           ex,
+           _
