@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from collections import Iterable
+from collections.abc import Iterable
 
 from ansible import errors
 from jinja2.filters import environmentfilter
