@@ -7,8 +7,9 @@ This repository contains custom Ansible plugins, that can be used in Ansible Rol
 - [Filter Plugins](#filter-plugins)
   - [Install](#install)
   - [Reference](#reference)
-    - [`selectattr2`](#selectattr2)
     - [`pbkdf2_hash`](#pbkdf2_hash)
+    - [`selectattr2`](#selectattr2)
+    - [`split`](#split)
     - [`to_gvariant`](#to_gvariant)
 - [Lookup Plugins](#lookup-plugins)
   - [Install](#install-1)
@@ -46,6 +47,16 @@ To install one or more _filters_ in an Ansible Playbook or Ansible Role, add a d
 
 ### Reference
 
+#### `pbkdf2_hash`
+
+Create a password hash using pbkdf2.
+
+**Example:**
+
+```django
+{{ plain_password | pbkdf2_hash(rounds=50000, scheme='sha512') }}
+```
+
 #### `selectattr2`
 
 Filter a sequence of objects by applying a test to the specified attribute of each object, and only selecting the objects with the test succeeding.
@@ -61,14 +72,19 @@ Examples:
 {{ users | selectattr2('state', '==', 'present', default='present') | list }}
 ```
 
-#### `pbkdf2_hash`
+#### `split`
 
-Create a password hash using pbkdf2.
+Split a string by a specified seperator string.
 
-**Example:**
+Splitting a string with Jinja can already accomplished by executing the split" method on strings, but when you want to use split in combination with "map" for example, you need a filter like this one.
 
+Examples:
 ```django
-{{ plain_password | pbkdf2_hash(rounds=50000, scheme='sha512') }}
+# split a simple string
+{{ 'Hello World' | split(' ') }} -> ['Hello', 'World']
+
+# split strings in combination with 'map'
+{{ ['1;2;3', 'a;b;c'] | map('split', ';') | list }} -> [['1', '2', '3'], ['a', 'b', 'c']]
 ```
 
 #### `to_gvariant`
