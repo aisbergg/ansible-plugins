@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (c) 2020 Andre Lehmann
+# Copyright (c) 2021 Andre Lehmann
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +21,9 @@
 # SOFTWARE.
 
 
+from types import GeneratorType
+
+
 class TestModule(object):
 
     def tests(self):
@@ -29,17 +32,23 @@ class TestModule(object):
         }
 
     def is_list(self, value):
-        """Test if a value is of type list.
+        """Test if a value a list or generator type.
 
         Jinja2 provides the tests `iterable` and `sequence`, but those also
-        match strings and dicts and can therefore not be used to determine, if a
-        value is a true list type. Therefore I wrote this test, which solves
-        this shortcoming.
+        match strings and dicts as well. To determine, if a value is essentially
+        a list, you need to check the following:
+
+            value is not string and value is not mapping and value is iterable
+
+        This test is a shortcut, which allows to check for a list or generator
+        simply with:
+
+            value is list
 
         Args:
             value: A value, that shall be type tested
 
         Returns:
-            bool: True, if value is of type list, False otherwise.
+            bool: True, if value is of type list or generator, False otherwise.
         """
-        return isinstance(value, list)
+        return isinstance(value, (list, GeneratorType))
