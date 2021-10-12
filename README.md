@@ -4,21 +4,22 @@ This repository contains custom Ansible plugins, that can be used in Ansible Rol
 
 **Table of contents:**
 
-- [Filter Plugins](#filter-plugins)
+- [Lookup Plugins](#lookup-plugins)
   - [Install](#install)
   - [Reference](#reference)
-    - [`pbkdf2_hash`](#pbkdf2_hash)
-    - [`selectattr2`](#selectattr2)
-    - [`split`](#split)
-    - [`to_gvariant`](#to_gvariant)
-- [Lookup Plugins](#lookup-plugins)
-  - [Install](#install-1)
-  - [Reference](#reference-1)
     - [`default4dist`](#default4dist)
     - [`keepassxc_browser_password`](#keepassxc_browser_password)
       - [Automatic Login (SSH And Become Password Lookup)](#automatic-login-ssh-and-become-password-lookup)
       - [Automatic Vault Decryption](#automatic-vault-decryption)
     - [`keepass_http_password`](#keepass_http_password)
+- [Filter Plugins](#filter-plugins)
+  - [Install](#install-1)
+  - [Reference](#reference-1)
+    - [`pbkdf2_hash`](#pbkdf2_hash)
+    - [`selectattr2`](#selectattr2)
+    - [`slugify`](#slugify)
+    - [`split`](#split)
+    - [`to_gvariant`](#to_gvariant)
 - [Test Plugins](#test-plugins)
   - [Install](#install-2)
   - [Reference](#reference-2)
@@ -28,75 +29,6 @@ This repository contains custom Ansible plugins, that can be used in Ansible Rol
 - [Author Information](#author-information)
 
 ---
-
-## Filter Plugins
-
-Filters are used to transform data inside template expressions. In general filters are used in the following fashion:
-
-```django
-# apply a filter to `some_variable`
-{{ some_variable | filter }}
-
-# apply a filter with extra arguments
-{{ some_variable | filter(arg1='foo', arg2='bar') }}
-```
-
-### Install
-
-To install one or more _filters_ in an Ansible Playbook or Ansible Role, add a directory named `filter_plugins` and place the _filters_ (Python scripts) inside it.
-
-### Reference
-
-#### `pbkdf2_hash`
-
-Create a password hash using pbkdf2.
-
-**Example:**
-
-```django
-{{ plain_password | pbkdf2_hash(rounds=50000, scheme='sha512') }}
-```
-
-#### `selectattr2`
-
-Filter a sequence of objects by applying a test to the specified attribute of each object, and only selecting the objects with the test succeeding.
-
-The built-in Jinja2 filter [`selectattr`](https://jinja.palletsprojects.com/en/2.11.x/templates/#selectattr) fails whenever the attribute is missing in one or more objects of the sequence. The `selectattr2` is designed to not fail under such conditions and allows to specify a default value for missing attributes.
-
-Examples:
-```django
-# select objects, where the attribute is defined
-{{ users | selectattr2('name', 'defined') | list }}
-
-# select objects, where the attribute is equal to a value
-{{ users | selectattr2('state', '==', 'present', default='present') | list }}
-```
-
-#### `split`
-
-Split a string by a specified seperator string.
-
-Splitting a string with Jinja can already accomplished by executing the split" method on strings, but when you want to use split in combination with "map" for example, you need a filter like this one.
-
-Examples:
-```django
-# split a simple string
-{{ 'Hello World' | split(' ') }} -> ['Hello', 'World']
-
-# split strings in combination with 'map'
-{{ ['1;2;3', 'a;b;c'] | map('split', ';') | list }} -> [['1', '2', '3'], ['a', 'b', 'c']]
-```
-
-#### `to_gvariant`
-
-Convert a value to GVariant Text Format.
-
-**Example:**
-
-```django
-{{ [1, 3.14, True, "foo", {"bar": 0}, ("foo", "bar")] | to_gvariant() }}
--> [1, 3.14, true, 'foo', {'bar': 0}, ('foo', 'bar')]
-```
 
 ## Lookup Plugins
 
@@ -298,11 +230,91 @@ The plugin requires the Python [`keepasshttp`](https://github.com/cyrbil/python_
     var3: "{{ lookup('keepass_http_password', 'url=https://secret name=\"My Secret\"') }}"
 ```
 
+## Filter Plugins
+
+Filters are used to transform data inside template expressions. In general filters are used in the following fashion:
+
+```jinja
+# apply a filter to `some_variable`
+{{ some_variable | filter }}
+
+# apply a filter with extra arguments
+{{ some_variable | filter(arg1='foo', arg2='bar') }}
+```
+
+### Install
+
+To install one or more _filters_ in an Ansible Playbook or Ansible Role, add a directory named `filter_plugins` and place the _filters_ (Python scripts) inside it.
+
+### Reference
+
+#### `pbkdf2_hash`
+
+Create a password hash using pbkdf2.
+
+**Example:**
+
+```jinja
+{{ plain_password | pbkdf2_hash(rounds=50000, scheme='sha512') }}
+```
+
+#### `selectattr2`
+
+Filter a sequence of objects by applying a test to the specified attribute of each object, and only selecting the objects with the test succeeding.
+
+The built-in Jinja2 filter [`selectattr`](https://jinja.palletsprojects.com/en/2.11.x/templates/#selectattr) fails whenever the attribute is missing in one or more objects of the sequence. The `selectattr2` is designed to not fail under such conditions and allows to specify a default value for missing attributes.
+
+Examples:
+```jinja
+# select objects, where the attribute is defined
+{{ users | selectattr2('name', 'defined') | list }}
+
+# select objects, where the attribute is equal to a value
+{{ users | selectattr2('state', '==', 'present', default='present') | list }}
+```
+
+#### `slugify`
+
+Convert a string to a slug representation.
+
+The filter converts strings into slugs by removing non alphanumerics, underscores, or hyphens, converting to lower case and stripping leading and trailing whitespace, dashes, and underscores.
+
+Examples:
+```jinja
+{{ 'Hello World' | slugify() }} -> 'hello-world'
+```
+
+#### `split`
+
+Split a string by a specified seperator string.
+
+Splitting a string with Jinja can already accomplished by executing the split" method on strings, but when you want to use split in combination with "map" for example, you need a filter like this one.
+
+Examples:
+```jinja
+# split a simple string
+{{ 'Hello World' | split(' ') }} -> ['Hello', 'World']
+
+# split strings in combination with 'map'
+{{ ['1;2;3', 'a;b;c'] | map('split', ';') | list }} -> [['1', '2', '3'], ['a', 'b', 'c']]
+```
+
+#### `to_gvariant`
+
+Convert a value to GVariant Text Format.
+
+**Example:**
+
+```jinja
+{{ [1, 3.14, True, "foo", {"bar": 0}, ("foo", "bar")] | to_gvariant() }}
+-> [1, 3.14, true, 'foo', {'bar': 0}, ('foo', 'bar')]
+```
+
 ## Test Plugins
 
 Tests are used to evaluate template expressions and return either True or False. Tests are used as follows:
 
-```django
+```jinja
 # using a test on `some_variable`
 {% if some_variable is test %}{% endif %}
 
