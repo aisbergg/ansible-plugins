@@ -54,15 +54,19 @@ The default4dist lookup looks for a variable by a name prefix in combination wit
 
 The lookup will search for variables in form of `{prefix}{suffix}` or `{prefix}_{suffix}`. The first found variable will be used or optional combined (dict or list) with a default value. The suffix is constructed in the following order of precedence: 
 
-- {distribution}_{version}
-- {distribution}_{release}
-- {distribution}_{major_version}
-- {distribution}
-- {familiy}_{version}
-- {familiy}_{release}
-- {familiy}_{major_version}
-- {familiy}
-- default
+- `{distribution}_{release}_{version}`
+- `{distribution}_{release}_{major_version}`
+- `{distribution}_{release}`
+- `{distribution}_{version}`
+- `{distribution}_{major_version}`
+- `{distribution}`
+- `{familiy}_{release}_{version}`
+- `{familiy}_{release}_{major_version}`
+- `{familiy}_{release}`
+- `{familiy}_{version}`
+- `{familiy}_{major_version}`
+- `{familiy}`
+- `default`
 
 OS distribution and family names must be specified in lower case.
 
@@ -72,26 +76,30 @@ OS distribution and family names must be specified in lower case.
 # a simple value that differs on different Linux distributions
 myvar: "{{
     'foo' if ansible_distribution == 'Debian' else
+    'bar' if ansible_distribution == 'CentOS' and ansible_distribution_release == 'Stream' else
     'bar' if ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8' else
     'baz'
 }}"
 # can be replaced by:
 _myvar_default: baz
 _myvar_debian: foo
-_myvar_centos_8: bar
+_myvar_centos_stream: bar
+_myvar_centos_8: foobar
 myvar: "{{ lookup('default4dist', '_myvar') }}"
 
 
 # a dictionary that contains some distribution dependent values
 myvar: "{{
     {'a': 1, 'b': foo} if ansible_distribution == 'Debian' else
-    {'a': 2, 'b': bar} if ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8' else
+    {'a': 2, 'b': bar} if ansible_distribution == 'CentOS' and ansible_distribution_release == 'Stream' else
+    {'a': 3, 'b': bar} if ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8' else
     {'a': 1, 'b': baz}
 }}"
 # can be replaced by:
 _myvar_default: {'a': 1, 'b': baz}
-_myvar_debian: {'b': bar}
-_myvar_centos_8: {'a': 2, 'b': bar}
+_myvar_debian: {'b': foo}
+_myvar_centos_stream: {'a': 2, 'b': bar}
+_myvar_centos_8: {'a': 3, 'b': bar}
 myvar: "{{ lookup('default4dist', '_myvar', recursive=True) }}"
 ```
 
