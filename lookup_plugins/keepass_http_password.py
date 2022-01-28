@@ -51,7 +51,7 @@ notes:
       to trim down the results.
     - "The plugin configuration can be controlled by defining variables in Ansible. Following variables affect the
       plugins behavior:"
-    - "C(keepass_http_password_url): KeePass HTTPPass plugin connection URL (default: http://localhost:19455/)"
+    - "C(keepass_http_password_url): KeePass HTTPPass plugin connection URL (default: U(http://localhost:19455/))"
     - "C(keepass_http_password_state_file): Name of the state file (default: C(.keepass-assoc))"
 '''
 

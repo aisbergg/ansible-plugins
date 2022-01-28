@@ -109,12 +109,17 @@ Retrieves a password from an opened KeePassXC database using the KeePassXC Brows
 
 The plugin allows to automatically load sensitive information from KeePassXC into Ansible, thus can be used as an addition to or even replacement of the Ansible vault. Besides loading passwords for your database for example, you can also load the Ansible _become_ or _SSH_ password and avoid retyping it over and over again.
 
+The KeePass Lookup allows to retrieve password from an opened KeePass database and use them directly in Ansible. The plugin works like any of the KeePass browser plugins, it connects to a local port via HTTP, forms an (cryptographic) association and is then able to retrieve passwords.
+
+The entries in the database need to be properly named. First of all the entries must have a valid URL, because the protocol returns entries by matching a given URL. The URL must consists at least of a scheme and a hostname (e.g. 'https://foo', don't use a random scheme, KeePass doesn't like that). Searching only by an URL might not return a unique result, therefore the results can be trimmed down by adding filters for the entry `name` or `login`. See the plugin documentation for more information.
+
+
 **Installation:**
 
-The plugin requires the Python [`keepassxc_browser`](https://github.com/hrehfeld/python-keepassxc-browser) module. In particular the following version needs to be installed, wich contains a fix for an important bug:
+The plugin requires the Python [`keepassxc_browser`](https://github.com/hrehfeld/python-keepassxc-browser) module. It can be installed in user context like this:
 
 ```sh
-pip install --user git+https://github.com/piegamesde/python-keepassxc-browser.git@cdf44db9f9fe696dd5863008b7c594f9e0bdaf28
+pip install --user keepassxc-browser
 ```
 
 **Example:**
@@ -219,11 +224,20 @@ The script needs to be saved as `*-client.py` in order to work. One thing that n
 
 Retrieves a password from an opened KeePass database using the KeePass HTTP protocol.
 
+The KeePass Lookup allows to retrieve password from an opened KeePass database and use them directly in Ansible. The plugin works like any of the KeePass browser plugins, it connects to a local port via HTTP, forms an (cryptographic) association and is then able to retrieve passwords.
+
+The entries in the database need to be properly named. First of all the entries must have a valid URL, because the protocol returns entries by matching a given URL. The URL must consists at least of a scheme and a hostname (e.g. 'https://foo', don't use a random scheme, KeePass doesn't like that). Searching only by an URL might not return a unique result, therefore the results can be trimmed down by adding filters for the entry `name` or `login`. See the plugin documentation for more information.
+
+
 This plugin works much like the [`keepassxc_browser_password`](#keepassxc_browser_password) plugin and offers similar features.
 
 **Installation:**
 
 The plugin requires the Python [`keepasshttp`](https://github.com/cyrbil/python_keepass_http) module. You can install it via `pip install --user keepasshttp`. After that the plugin just needs to be copied into dir `lookup_plugins` in your Ansible repository.
+
+1. Install KeePassHttp plugin: https://github.com/pfn/keepasshttp/
+2. Install KeePassHttp Python module: `pip install --user keepasshttp`
+3. Open KeePass and configure the KeePassHttp plugin to match the schemes: _Tools_ ➞ _KeePassHttp Options..._ ➞ _General_ ➞ _Match URL schemes_
 
 **Example:**
 
