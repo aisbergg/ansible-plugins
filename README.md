@@ -2,6 +2,8 @@
 
 This repository contains custom Ansible plugins, that can be used in Ansible Roles and Playbooks.
 
+> Note: Only Python 3 is supported since Python 2 has long been EOL. For Ansible to use Python 3 you can specify the path to the Python executable using the variable `ansible_python_interpreter=/usr/bin/python3` in your inventory.
+
 **Table of contents:**
 
 - [Lookup Plugins](#lookup-plugins)
