@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (c) 2020 Andre Lehmann
+# Copyright (c) 2024 Andre Lehmann
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -85,7 +85,7 @@ try:
 except ImportError:
     KEEPASSXC_BROWSER_MODULE_AVAILABLE = False
 
-__version__ = '1.2.0'
+__version__ = '1.2.1'
 __license__ = 'MIT'
 __email__ = 'aisberg@posteo.de'
 
@@ -206,6 +206,7 @@ class LookupModule(LookupBase):
         except Exception as excp:
             raise AnsibleError("KeePassXC password lookup execution failed: {}".format(excp))
 
+        terms.append(kwargs)
         ret = []
         try:
             for term in terms:

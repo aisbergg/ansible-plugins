@@ -1,13 +1,12 @@
 # Ansible Plugins
 
-This repository contains custom Ansible plugins, that can be used in Ansible Roles and Playbooks.
-
-> Note: Only Python 3 is supported since Python 2 has long been EOL. For Ansible to use Python 3 you can specify the path to the Python executable using the variable `ansible_python_interpreter=/usr/bin/python3` in your inventory.
+This repository contains custom Ansible plugins that can be used in Ansible Roles and Playbooks.
 
 **Table of contents:**
 
+- [Installation](#installation)
 - [Lookup Plugins](#lookup-plugins)
-  - [Install](#install)
+  - [Installation](#installation-1)
   - [Reference](#reference)
     - [`default4dist`](#default4dist)
     - [`keepassxc_browser_password`](#keepassxc_browser_password)
@@ -15,22 +14,83 @@ This repository contains custom Ansible plugins, that can be used in Ansible Rol
       - [Automatic Vault Decryption](#automatic-vault-decryption)
     - [`keepass_http_password`](#keepass_http_password)
 - [Filter Plugins](#filter-plugins)
-  - [Install](#install-1)
   - [Reference](#reference-1)
     - [`pbkdf2_hash`](#pbkdf2_hash)
     - [`selectattr2`](#selectattr2)
     - [`slugify`](#slugify)
     - [`split`](#split)
     - [`to_gvariant`](#to_gvariant)
+    - [`to_very_nice_yaml`](#to_very_nice_yaml)
 - [Test Plugins](#test-plugins)
-  - [Install](#install-2)
   - [Reference](#reference-2)
     - [`boolean`](#boolean)
     - [`list`](#list)
+- [Modules](#modules)
+  - [Reference](#reference-3)
+    - [`random_password`](#random_password)
 - [License](#license)
 - [Author Information](#author-information)
 
 ---
+
+## Installation
+
+You have different options on where to install and where to use the plugins in your project. Essentially you just have to drop the plugin file (`*.py`) that you want to install into the correct directory, more on that in a second. Some of the plugins also require external dependencies to be installed on your system. Installing these dependencies can be daunting if you don't have a good understanding of the intricacies of Python. I recommend installing Ansible using _PIPX_ as described in the [official Ansible docs](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#installing-and-upgrading-ansible-with-pipx) and than adding the dependencies. Here is a quick rundown:
+
+1. Install PIPX:
+    - Debian: `apt-get update && apt-get install pipx`
+    - Arch Linux: `pacman -Sy python-pipx`
+2. Install Ansible: `pipx install --include-deps ansible`
+3. Install the dependencies: `pipx inject some_dependency another_dependency`
+
+Copying the plugin files:
+
+**Role Level**
+
+If you want to use a plugin in one of your roles put the plugins in your role directory in the correct dir:
+
+```plaintext
+your_name.your_role
+├── defaults, tasks, etc.   # standard role dirs
+├── library                 # Complex logic that you rather want to implement via Python; will be made available as a task module
+├── filter_plugins          # Jinja filters, e.g.: {{ "abc" | upper }}
+└── test_plugins            # Jinja tests, e.g.: {% if [1,2,3] is list %}
+```
+
+**Root Level**
+
+If you want to make a plugin available throughout your Ansible project, you can add the plugins here:
+
+```plaintext
+ansible-playbooks
+├── roles, host_vars, etc.  # standard project dirs
+└── plugins                 # for organizing your plugins
+    ├── modules             # Complex logic that you rather want to implement via Python; will be made available as a task module
+    ├── filter_plugins      # Jinja filters, e.g.: {{ "abc" | upper }}
+    ├── lookup_plugins      # Variable lookups, e.g.: "{{ lookup('password', '/tmp/passwordfile') }}"
+    └── test_plugins        # Jinja tests, e.g.: {% if [1,2,3] is list %}
+```
+
+Then edit your `ansible.cfg` in the root of your project:
+
+```ini
+[defaults]
+# add local ./plugins/ path as source for plugins
+library            = ./plugins/modules:~/.ansible/plugins/modules:/usr/share/ansible/plugins/modules
+action_plugins     = ./plugins/action:~/.ansible/plugins/action:/usr/share/ansible/plugins/action
+cache_plugins      = ./plugins/cache:~/.ansible/plugins/cache:/usr/share/ansible/plugins/cache
+callback_plugins   = ./plugins/callback:~/.ansible/plugins/callback:/usr/share/ansible/plugins/callback
+connection_plugins = ./plugins/connection:~/.ansible/plugins/connection:/usr/share/ansible/plugins/connection
+lookup_plugins     = ./plugins/lookup:~/.ansible/plugins/lookup:/usr/share/ansible/plugins/lookup
+inventory_plugins  = ./plugins/inventory:~/.ansible/plugins/inventory:/usr/share/ansible/plugins/inventory
+vars_plugins       = ./plugins/vars:~/.ansible/plugins/vars:/usr/share/ansible/plugins/vars
+filter_plugins     = ./plugins/filter:~/.ansible/plugins/filter:/usr/share/ansible/plugins/filter
+test_plugins       = ./plugins/test:~/.ansible/plugins/test:/usr/share/ansible/plugins/test
+```
+
+<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+
+
 
 ## Lookup Plugins
 
@@ -42,9 +102,17 @@ Lookup plugins allow Ansible to access data from outside sources. Lookups are us
     var: "{{ lookup('password', '/tmp/passwordfile') }}"
 ```
 
-### Install
+<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+
+
+
+### Installation
 
 To install one or more _lookups_ in an Ansible Playbook or Ansible Role, add a directory named `lookup_plugins` and place the _lookups_ (Python scripts) inside it.
+
+<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+
+
 
 ### Reference
 
@@ -105,6 +173,10 @@ _myvar_centos_8: {'a': 3, 'b': bar}
 myvar: "{{ lookup('default4dist', '_myvar', recursive=True) }}"
 ```
 
+<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+
+
+
 #### `keepassxc_browser_password`
 
 Retrieves a password from an opened KeePassXC database using the KeePassXC Browser protocol.
@@ -138,6 +210,10 @@ pip install --user keepassxc-browser
     # password lookup by URL and group
     var4: "{{ lookup('keepassxc_browser_password', 'url=ansible://secret group=department_x') }}"
 ```
+
+<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+
+
 
 ##### Automatic Login (SSH And Become Password Lookup)
 
@@ -222,6 +298,10 @@ The script needs to be saved as `*-client.py` in order to work. One thing that n
    - URL: `ansible://ansible-vault`
 2. Run Ansible: `ansible-playbook --vault-id myuser@/path/to/vault-pass-client.py ...`
 
+<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+
+
+
 #### `keepass_http_password`
 
 Retrieves a password from an opened KeePass database using the KeePass HTTP protocol.
@@ -254,6 +334,10 @@ The plugin requires the Python [`keepasshttp`](https://github.com/cyrbil/python_
     var3: "{{ lookup('keepass_http_password', 'url=https://secret name=\"My Secret\"') }}"
 ```
 
+<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+
+
+
 ## Filter Plugins
 
 Filters are used to transform data inside template expressions. In general filters are used in the following fashion:
@@ -266,9 +350,9 @@ Filters are used to transform data inside template expressions. In general filte
 {{ some_variable | filter(arg1='foo', arg2='bar') }}
 ```
 
-### Install
+<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
 
-To install one or more _filters_ in an Ansible Playbook or Ansible Role, add a directory named `filter_plugins` and place the _filters_ (Python scripts) inside it.
+
 
 ### Reference
 
@@ -281,6 +365,10 @@ Create a password hash using pbkdf2.
 ```jinja
 {{ plain_password | pbkdf2_hash(rounds=50000, scheme='sha512') }}
 ```
+
+<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+
+
 
 #### `selectattr2`
 
@@ -297,6 +385,10 @@ Examples:
 {{ users | selectattr2('state', '==', 'present', default='present') | list }}
 ```
 
+<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+
+
+
 #### `slugify`
 
 Convert a string to a slug representation.
@@ -308,11 +400,15 @@ Examples:
 {{ 'Hello World' | slugify() }} -> 'hello-world'
 ```
 
+<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+
+
+
 #### `split`
 
 Split a string by a specified seperator string.
 
-Splitting a string with Jinja can already accomplished by executing the split" method on strings, but when you want to use split in combination with "map" for example, you need a filter like this one.
+Splitting a string with Jinja can already accomplished by executing the `split` method on strings (e.g. `"Hello World".split(" ")`), but when you want to use split in combination with "map" for example, you need a filter like this one.
 
 Examples:
 ```jinja
@@ -322,6 +418,10 @@ Examples:
 # split strings in combination with 'map'
 {{ ['1;2;3', 'a;b;c'] | map('split', ';') | list }} -> [['1', '2', '3'], ['a', 'b', 'c']]
 ```
+
+<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+
+
 
 #### `to_gvariant`
 
@@ -333,6 +433,18 @@ Convert a value to GVariant Text Format.
 {{ [1, 3.14, True, "foo", {"bar": 0}, ("foo", "bar")] | to_gvariant() }}
 -> [1, 3.14, true, 'foo', {'bar': 0}, ('foo', 'bar')]
 ```
+
+<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+
+
+
+#### `to_very_nice_yaml`
+
+Similar to Ansibles built-in `to_nice_yaml`, but it dumps multi line strings as `|` blocks without line wrapping.
+
+<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+
+
 
 ## Test Plugins
 
@@ -346,9 +458,9 @@ Tests are used to evaluate template expressions and return either True or False.
 {% if some_variable is test(arg1='foo', arg2='bar') %}{% endif %}
 ```
 
-### Install
+<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
 
-To install one or more _tests_ in an Ansible Playbook or Ansible Role, add a directory named `test_plugins` and place the _tests_ (Python scripts) inside it.
+
 
 ### Reference
 
@@ -363,6 +475,10 @@ This test plugin can be used until Ansible adapts Jinja2 version 2.11, which com
 ```jinja
 {% if foo is boolean %}{{ foo | ternary('yes', 'no') }}{% endif %}
 ```
+
+<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+
+
 
 #### `list`
 
@@ -382,9 +498,63 @@ This test is a shortcut, which allows to check for a list or generator simply wi
 {% if foo is list %}{{ foo | join(', ') }}{% endif %}
 ```
 
+<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+
+
+
+## Modules
+
+Lookup plugins allow Ansible to access data from outside sources. Lookups are used as follows:
+
+```yaml
+- set_fact:
+    # retrieve or generate a random password
+    var: "{{ lookup('password', '/tmp/passwordfile') }}"
+```
+
+<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+
+
+
+### Reference
+
+#### `random_password`
+
+Generate a random password and optionally save it to a file on the target. Differently than the built-in `password` lookup, this module creates and saves the passwords on the target host. This can be useful for creating idempotent secrets you don't want to manage locally.
+
+**Example:**
+
+```yaml
+# Generate a random password with default settings and save it to /etc/ansible/password
+- name: Generate and save a password
+  random_password:
+
+# Generate a random password using a custom character set and assign it to the 'my_password' variable
+- name: Generate and assign a password
+  random_password:
+    chars: "digits, punctuation"
+    length: 12
+    var_name: my_password
+
+# Generate a random password and set specific file permissions and ownership
+- name: Generate and set file permissions
+  random_password:
+    mode: 0600
+    owner: ansible
+    group: ansible
+```
+
+<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+
+
+
 ## License
 
 MIT
+
+<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+
+
 
 ## Author Information
 
