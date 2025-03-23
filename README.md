@@ -1,3 +1,5 @@
+<a name="readme-top"></a>
+
 # Ansible Plugins
 
 This repository contains custom Ansible plugins that can be used in Ansible Roles and Playbooks.
@@ -88,7 +90,7 @@ filter_plugins     = ./plugins/filter:~/.ansible/plugins/filter:/usr/share/ansib
 test_plugins       = ./plugins/test:~/.ansible/plugins/test:/usr/share/ansible/plugins/test
 ```
 
-<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+<p align="right"><a href="#readme-top"><b>back to top ⇧</b></a></p>
 
 
 
@@ -102,7 +104,7 @@ Lookup plugins allow Ansible to access data from outside sources. Lookups are us
     var: "{{ lookup('password', '/tmp/passwordfile') }}"
 ```
 
-<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+<p align="right"><a href="#readme-top"><b>back to top ⇧</b></a></p>
 
 
 
@@ -110,7 +112,7 @@ Lookup plugins allow Ansible to access data from outside sources. Lookups are us
 
 To install one or more _lookups_ in an Ansible Playbook or Ansible Role, add a directory named `lookup_plugins` and place the _lookups_ (Python scripts) inside it.
 
-<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+<p align="right"><a href="#readme-top"><b>back to top ⇧</b></a></p>
 
 
 
@@ -173,7 +175,7 @@ _myvar_centos_8: {'a': 3, 'b': bar}
 myvar: "{{ lookup('default4dist', '_myvar', recursive=True) }}"
 ```
 
-<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+<p align="right"><a href="#readme-top"><b>back to top ⇧</b></a></p>
 
 
 
@@ -211,7 +213,7 @@ pipx inject ansible keepassxc-browser
     var4: "{{ lookup('keepassxc_browser_password', 'url=ansible://secret group=department_x') }}"
 ```
 
-<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+<p align="right"><a href="#readme-top"><b>back to top ⇧</b></a></p>
 
 
 
@@ -298,7 +300,7 @@ The script needs to be saved as `*-client.py` in order to work. One thing that n
    - URL: `ansible://ansible-vault`
 2. Run Ansible: `ansible-playbook --vault-id myuser@/path/to/vault-pass-client.py ...`
 
-<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+<p align="right"><a href="#readme-top"><b>back to top ⇧</b></a></p>
 
 
 
@@ -334,7 +336,7 @@ To use the plugin you have to perform the following steps:
     var3: "{{ lookup('keepass_http_password', 'url=https://secret name=\"My Secret\"') }}"
 ```
 
-<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+<p align="right"><a href="#readme-top"><b>back to top ⇧</b></a></p>
 
 
 
@@ -350,7 +352,7 @@ Filters are used to transform data inside template expressions. In general filte
 {{ some_variable | filter(arg1='foo', arg2='bar') }}
 ```
 
-<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+<p align="right"><a href="#readme-top"><b>back to top ⇧</b></a></p>
 
 
 
@@ -366,7 +368,7 @@ Create a password hash using pbkdf2.
 {{ plain_password | pbkdf2_hash(rounds=50000, scheme='sha512') }}
 ```
 
-<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+<p align="right"><a href="#readme-top"><b>back to top ⇧</b></a></p>
 
 
 
@@ -385,7 +387,7 @@ Examples:
 {{ users | selectattr2('state', '==', 'present', default='present') | list }}
 ```
 
-<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+<p align="right"><a href="#readme-top"><b>back to top ⇧</b></a></p>
 
 
 
@@ -400,7 +402,7 @@ Examples:
 {{ 'Hello World' | slugify() }} -> 'hello-world'
 ```
 
-<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+<p align="right"><a href="#readme-top"><b>back to top ⇧</b></a></p>
 
 
 
@@ -419,7 +421,7 @@ Examples:
 {{ ['1;2;3', 'a;b;c'] | map('split', ';') | list }} -> [['1', '2', '3'], ['a', 'b', 'c']]
 ```
 
-<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+<p align="right"><a href="#readme-top"><b>back to top ⇧</b></a></p>
 
 
 
@@ -434,7 +436,7 @@ Convert a value to GVariant Text Format.
 -> [1, 3.14, true, 'foo', {'bar': 0}, ('foo', 'bar')]
 ```
 
-<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+<p align="right"><a href="#readme-top"><b>back to top ⇧</b></a></p>
 
 
 
@@ -442,7 +444,7 @@ Convert a value to GVariant Text Format.
 
 Similar to Ansibles built-in `to_nice_yaml`, but it dumps multi line strings as `|` blocks without line wrapping.
 
-<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+<p align="right"><a href="#readme-top"><b>back to top ⇧</b></a></p>
 
 
 
@@ -458,7 +460,7 @@ Tests are used to evaluate template expressions and return either True or False.
 {% if some_variable is test(arg1='foo', arg2='bar') %}{% endif %}
 ```
 
-<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+<p align="right"><a href="#readme-top"><b>back to top ⇧</b></a></p>
 
 
 
@@ -476,7 +478,7 @@ This test plugin can be used until Ansible adapts Jinja2 version 2.11, which com
 {% if foo is boolean %}{{ foo | ternary('yes', 'no') }}{% endif %}
 ```
 
-<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+<p align="right"><a href="#readme-top"><b>back to top ⇧</b></a></p>
 
 
 
@@ -498,7 +500,7 @@ This test is a shortcut, which allows to check for a list or generator simply wi
 {% if foo is list %}{{ foo | join(', ') }}{% endif %}
 ```
 
-<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+<p align="right"><a href="#readme-top"><b>back to top ⇧</b></a></p>
 
 
 
@@ -512,7 +514,7 @@ Lookup plugins allow Ansible to access data from outside sources. Lookups are us
     var: "{{ lookup('password', '/tmp/passwordfile') }}"
 ```
 
-<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+<p align="right"><a href="#readme-top"><b>back to top ⇧</b></a></p>
 
 
 
@@ -544,7 +546,7 @@ Generate a random password and optionally save it to a file on the target. Diffe
     group: ansible
 ```
 
-<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+<p align="right"><a href="#readme-top"><b>back to top ⇧</b></a></p>
 
 
 
@@ -552,7 +554,7 @@ Generate a random password and optionally save it to a file on the target. Diffe
 
 MIT
 
-<p align="right"><a href="#readme-top" alt="abc"><b>back to top ⇧</b></a></p>
+<p align="right"><a href="#readme-top"><b>back to top ⇧</b></a></p>
 
 
 
