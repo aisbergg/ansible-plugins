@@ -41,7 +41,7 @@ You have different options on where to install and where to use the plugins in y
     - Debian: `apt-get update && apt-get install pipx`
     - Arch Linux: `pacman -Sy python-pipx`
 2. Install Ansible: `pipx install --include-deps ansible`
-3. Install the dependencies: `pipx inject some_dependency another_dependency`
+3. Install the dependencies: `pipx inject ansible some_dependency another_dependency`
 
 Copying the plugin files:
 
@@ -190,10 +190,10 @@ The entries in the database need to be properly named. First of all the entries 
 
 **Installation:**
 
-The plugin requires the Python [`keepassxc_browser`](https://github.com/hrehfeld/python-keepassxc-browser) module. It can be installed in user context like this:
+The plugin requires the Python [`keepassxc_browser`](https://github.com/hrehfeld/python-keepassxc-browser) module. If you installed Ansible using PIPX as described in the [Installation](#installation) section, then just run the following command to get the dependency:
 
 ```sh
-pip install --user keepassxc-browser
+pipx inject ansible keepassxc-browser
 ```
 
 **Example:**
@@ -315,10 +315,10 @@ This plugin works much like the [`keepassxc_browser_password`](#keepassxc_browse
 
 **Installation:**
 
-The plugin requires the Python [`keepasshttp`](https://github.com/cyrbil/python_keepass_http) module. You can install it via `pip install --user keepasshttp`. After that the plugin just needs to be copied into dir `lookup_plugins` in your Ansible repository.
+To use the plugin you have to perform the following steps:
 
 1. Install KeePassHttp plugin: https://github.com/pfn/keepasshttp/
-2. Install KeePassHttp Python module: `pip install --user keepasshttp`
+2. Install [`keepasshttp`](https://github.com/cyrbil/python_keepass_http) Python module: `pipx inject ansible keepasshttp`
 3. Open KeePass and configure the KeePassHttp plugin to match the schemes: _Tools_ ➞ _KeePassHttp Options..._ ➞ _General_ ➞ _Match URL schemes_
 
 **Example:**
